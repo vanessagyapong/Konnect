@@ -44,24 +44,24 @@ const customColors = {
   bottomNavActive: '#000000', // Pure Black for bottom nav active icons
 };
 
-// Light theme shadow configuration
+// Elevation/Shadow styles
 export const shadows = {
   sm: {
-    shadowColor: '#1E90FF',  // Sky Blue shadow
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
   },
   md: {
-    shadowColor: '#1E90FF',  // Sky Blue shadow
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   lg: {
-    shadowColor: '#1E90FF',  // Sky Blue shadow
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -69,32 +69,7 @@ export const shadows = {
   },
 };
 
-// Dark theme shadow configuration
-const darkShadows = {
-  sm: {
-    shadowColor: '#FFD700',  // Bright Yellow shadow for dark mode
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#FFD700',  // Bright Yellow shadow for dark mode
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: '#FFD700',  // Bright Yellow shadow for dark mode
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-};
-
-// Light theme configuration
+// Light theme shadow configuration
 export const lightTheme: Theme = {
   ...MD3LightTheme,
   fonts,
@@ -151,7 +126,7 @@ export const darkTheme: Theme = {
   },
   dark: true,
   roundness: 16,
-  shadows: darkShadows,  // Add dark mode shadows
+  shadows: shadows,  // Add dark mode shadows
 };
 
 // Spacing system (in pixels)

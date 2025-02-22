@@ -60,14 +60,15 @@ const Login = () => {
       // Validate ID number format
       const studentPattern = /^STU\d{6}$/;  // STU followed by 6 digits
       const staffPattern = /^STF\d{6}$/;    // STF followed by 6 digits
+      const adminPattern = /^ADM\d{6}$/;    // ADM followed by 6 digits
 
       if (userType === 'student' && !studentPattern.test(idNumber)) {
         setError('Invalid student ID format. Use STU followed by 6 digits');
         return;
       }
 
-      if (userType === 'staff' && !staffPattern.test(idNumber)) {
-        setError('Invalid staff ID format. Use STF followed by 6 digits');
+      if (userType === 'staff' && !staffPattern.test(idNumber) && !adminPattern.test(idNumber)) {
+        setError('Invalid staff ID format. Use STF or ADM followed by 6 digits');
         return;
       }
 
@@ -155,6 +156,10 @@ const Login = () => {
                       autoCapitalize="characters"
                       keyboardType="default"
                       nextInputRef={passwordInputRef}
+                      helperText={userType === 'student' ? 
+                        'Format: STU followed by 6 digits (e.g., STU123456)' : 
+                        'Format: STF or ADM followed by 6 digits (e.g., STF123456 or ADM123456)'
+                      }
                     />
                   </Animated.View>
 

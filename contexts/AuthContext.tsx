@@ -1,21 +1,19 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type UserRole = 'admin' | 'moderator' | 'user';
 export type UserType = 'student' | 'staff';
 
 interface User {
   id: string;
   email: string;
   username: string;
-  role: UserRole;
   userType: UserType;
   idNumber: string;
   fullName: string;
   department?: string;
   yearLevel?: number; // for students
   position?: string;  // for staff
-  status: 'active' | 'inactive' | 'banned';
+  status: 'active' | 'inactive';
 }
 
 interface AuthContextType {
@@ -35,8 +33,7 @@ interface AuthContextType {
     position?: string;
   }) => Promise<void>;
   isAdmin: () => boolean;
-  isModerator: () => boolean;
-  updateUserRole: (userId: string, role: UserRole) => Promise<void>;
+  updateUserRole: (userId: string, role: string) => Promise<void>;
   banUser: (userId: string) => Promise<void>;
   unbanUser: (userId: string) => Promise<void>;
 }
@@ -86,19 +83,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signIn(idNumber: string, password: string) {
     try {
       setIsLoading(true);
-      // TODO: Implement actual authentication here
-      // This is just mock data for demonstration
+      // Staff format: STF followed by 6 digits
+      // Student format: STU followed by 6 digits
+      const staffPattern = /^STF\d{6}$/;
+      const studentPattern = /^STU\d{6}$/;
+
+      let userType: UserType;
+
+      if (staffPattern.test(idNumber)) {
+        userType = 'staff';
+      } else if (studentPattern.test(idNumber)) {
+        userType = 'student';
+      } else {
+        throw new Error('Invalid ID number format');
+      }
+
       const mockUser: User = {
         id: '1',
         email: 'user@example.com',
-        username: 'user123',
-        role: idNumber.includes('admin') ? 'admin' : 'user',
-        userType: idNumber.startsWith('STF') ? 'staff' : 'student',
+        username: idNumber,
+        userType,
         idNumber,
         fullName: 'John Doe',
         department: 'Computer Science',
-        yearLevel: idNumber.startsWith('STF') ? undefined : 2,
-        position: idNumber.startsWith('STF') ? 'Professor' : undefined,
+        yearLevel: userType === 'student' ? 2 : undefined,
+        position: userType === 'staff' ? 'Professor' : undefined,
         status: 'active'
       };
 
@@ -151,7 +160,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: Math.random().toString(),
         email: userData.email,
         username: userData.email.split('@')[0],
-        role: 'user',
         userType: userData.userType,
         idNumber: userData.idNumber,
         fullName: userData.fullName,
@@ -177,28 +185,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function isAdmin() {
-    return user?.role === 'admin';
+    return user?.idNumber.startsWith('ADM') || false;
   }
 
-  function isModerator() {
-    return user?.role === 'moderator';
-  }
-
-  async function updateUserRole(userId: string, role: UserRole) {
+  async function updateUserRole(userId: string, role: string) {
     if (!isAdmin()) throw new Error('Unauthorized');
-    // TODO: Implement API call to update user role
+    // TODO: Implement actual role update
     console.log(`Updating user ${userId} role to ${role}`);
   }
 
   async function banUser(userId: string) {
-    if (!isAdmin() && !isModerator()) throw new Error('Unauthorized');
-    // TODO: Implement API call to ban user
+    if (!isAdmin()) throw new Error('Unauthorized');
+    // TODO: Implement actual ban
     console.log(`Banning user ${userId}`);
   }
 
   async function unbanUser(userId: string) {
     if (!isAdmin()) throw new Error('Unauthorized');
-    // TODO: Implement API call to unban user
+    // TODO: Implement actual unban
     console.log(`Unbanning user ${userId}`);
   }
 
@@ -212,7 +216,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         signUp,
         isAdmin,
-        isModerator,
         updateUserRole,
         banUser,
         unbanUser,

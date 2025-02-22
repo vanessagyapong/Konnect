@@ -6,7 +6,7 @@ import { CustomTabBar } from '@/components/CustomTabBar';
 
 export default function TabLayout() {
   const { theme } = useTheme();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
@@ -74,18 +74,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-      {isAdmin() && (
-        <Tabs.Screen
-          name="admin"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="shield-account" size={size} color={color} />
-            ),
-          }}
-        />
-      )}
     </Tabs>
   );
 }
