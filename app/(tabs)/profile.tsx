@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { View, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { Text, Surface, List, IconButton, Menu, Divider } from 'react-native-paper';
+import { Text, Surface, List, IconButton, Menu, Divider, Avatar, Button, Card } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -18,7 +18,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
-import { mockAcademicProfile, mockStudyGroups } from '@/data/mockUniversityData';
+import { mockAcademicProfile, mockStudyGroups, mockDepartments } from '@/data/mockUniversityData';
 
 const AnimatedSurface = Animated.createAnimatedComponent(Surface);
 
@@ -64,14 +64,12 @@ const ThemeOption = ({ title, icon, value, index }: ThemeOption) => {
 export default function Profile() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const { theme, themeMode: themeType, setThemeMode: setTheme } = useTheme();
+  const { theme } = useTheme();
   const [menuVisible, setMenuVisible] = useState(false);
   const [showActivities, setShowActivities] = useState(false);
   const [showCommunities, setShowCommunities] = useState(false);
-  const [showAcademic, setShowAcademic] = useState(false);
-  const [showCourses, setShowCourses] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
-  const scrollY = useSharedValue(0);
   const scale = useSharedValue(1);
   const rotation = useSharedValue(0);
 
@@ -89,32 +87,80 @@ export default function Profile() {
     );
   }, [menuVisible]);
 
+  const joinedDate = new Date(2023, 8, 15); // Example date
+
   return (
     <SafeAreaView style={[sharedStyles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView>
+        {/* Basic User Information */}
         <Animated.View style={[sharedStyles.header, headerStyle]}>
           <View style={{ alignItems: 'center', marginBottom: spacing.xl }}>
-            <IconButton
-              icon="account-circle"
-              size={80}
-              style={{ margin: 0 }}
+            <Avatar.Image
+              size={100}
+              source={{ uri: 'https://ui-avatars.com/api/?name=' + user?.fullName }}
             />
             <Text variant="headlineSmall" style={{ marginTop: spacing.sm }}>
-              {user?.email || 'User Email'}
+              {user?.fullName || 'User Name'}
             </Text>
             <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-              {mockAcademicProfile.major} • Year {mockAcademicProfile.year}
+              {user?.email || 'user@example.com'}
+            </Text>
+            <View style={{ flexDirection: 'row', marginTop: spacing.xs }}>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                {mockAcademicProfile.major} • Year {mockAcademicProfile.year}
+              </Text>
+            </View>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: spacing.xs }}>
+              Joined {joinedDate.toLocaleDateString()}
+            </Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.primary, marginTop: spacing.xs }}>
+              {user?.userType === 'student' ? 'Student' : 'Staff'}
             </Text>
           </View>
         </Animated.View>
 
+        {/* User Activity and Engagement */}
         <List.Section>
           <Animated.View entering={FadeInDown.duration(500)}>
             <List.Accordion
+              title="Activity & Engagement"
+              left={props => <List.Icon {...props} icon="chart-timeline-variant" />}
+              expanded={showActivities}
+              onPress={() => setShowActivities(!showActivities)}
+            >
+              <List.Item
+                title="Joined Communities"
+                description={`${mockDepartments.length} communities`}
+                left={props => <List.Icon {...props} icon="account-group" />}
+                onPress={() => router.push({
+                  pathname: "/communities",
+                  params: { filter: 'joined' }
+                })}
+              />
+              <List.Item
+                title="Saved Posts"
+                description="View your saved posts"
+                left={props => <List.Icon {...props} icon="bookmark-multiple" />}
+                onPress={() => router.push({ pathname: "/saved" })}
+              />
+              <List.Item
+                title="Recent Activity"
+                description="View your recent interactions"
+                left={props => <List.Icon {...props} icon="clock-outline" />}
+                onPress={() => router.push({ pathname: "/activity" })}
+              />
+            </List.Accordion>
+          </Animated.View>
+        </List.Section>
+
+        {/* Academic Information */}
+        <List.Section>
+          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+            <List.Accordion
               title="Academic Information"
               left={props => <List.Icon {...props} icon="school" />}
-              expanded={showAcademic}
-              onPress={() => setShowAcademic(!showAcademic)}
+              expanded={showCommunities}
+              onPress={() => setShowCommunities(!showCommunities)}
             >
               <List.Item
                 title="Major"
@@ -130,14 +176,13 @@ export default function Profile() {
               )}
               <List.Item
                 title="Academic Advisor"
-                description={`${mockAcademicProfile.advisor.name}\n${mockAcademicProfile.advisor.email}`}
+                description={mockAcademicProfile.advisor.name}
                 left={props => <List.Icon {...props} icon="account-tie" />}
-                onPress={() => console.log('Contact advisor')}
               />
               <List.Item
-                title="Credits Completed"
-                description={`${mockAcademicProfile.credits} credits`}
-                left={props => <List.Icon {...props} icon="certificate" />}
+                title="Credits"
+                description={`${mockAcademicProfile.credits} completed`}
+                left={props => <List.Icon {...props} icon="counter" />}
               />
               {mockAcademicProfile.gpa && (
                 <List.Item
@@ -150,107 +195,82 @@ export default function Profile() {
           </Animated.View>
         </List.Section>
 
-        <List.Section>
-          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
-            <List.Accordion
-              title="Current Courses"
-              left={props => <List.Icon {...props} icon="notebook" />}
-              expanded={showCourses}
-              onPress={() => setShowCourses(!showCourses)}
-            >
-              {mockAcademicProfile.courses.current.map(course => (
-                <List.Item
-                  key={course.id}
-                  title={course.name}
-                  description={`${course.code} • ${course.professor}`}
-                  left={props => <List.Icon {...props} icon="book-education" />}
-                  onPress={() => router.push({
-                    pathname: "/community/[id]" as const,
-                    params: { id: course.id }
-                  })}
-                />
-              ))}
-            </List.Accordion>
-          </Animated.View>
-        </List.Section>
+        <Divider />
 
+        {/* Preferences and Settings */}
         <List.Section>
           <Animated.View entering={FadeInDown.duration(500).delay(200)}>
             <List.Accordion
-              title="Study Groups"
-              left={props => <List.Icon {...props} icon="account-group" />}
-              expanded={showCommunities}
-              onPress={() => setShowCommunities(!showCommunities)}
+              title="Preferences & Settings"
+              left={props => <List.Icon {...props} icon="cog" />}
+              expanded={showPreferences}
+              onPress={() => setShowPreferences(!showPreferences)}
             >
-              {mockStudyGroups.map(group => (
-                <List.Item
-                  key={group.id}
-                  title={group.name}
-                  description={`${group.members.length} members`}
-                  left={props => <List.Icon {...props} icon="account-multiple" />}
-                  onPress={() => router.push({
-                    pathname: "/community/[id]" as const,
-                    params: { id: group.id }
-                  })}
-                />
-              ))}
+              <List.Item
+                title="Theme"
+                description="Customize app appearance"
+                left={props => <List.Icon {...props} icon="palette" />}
+                onPress={toggleMenu}
+              />
+              <List.Item
+                title="Notifications"
+                description="Manage notification settings"
+                left={props => <List.Icon {...props} icon="bell" />}
+                onPress={() => router.push({ pathname: "/settings/notifications" })}
+              />
+              <List.Item
+                title="Privacy"
+                description="Manage privacy settings"
+                left={props => <List.Icon {...props} icon="shield" />}
+                onPress={() => router.push({ pathname: "/settings/privacy" })}
+              />
+              <List.Item
+                title="Language"
+                description="Change app language"
+                left={props => <List.Icon {...props} icon="translate" />}
+                onPress={() => router.push({ pathname: "/settings/language" })}
+              />
             </List.Accordion>
           </Animated.View>
+
+          {menuVisible && (
+            <AnimatedSurface 
+              entering={FadeInDown.springify()}
+              style={{ backgroundColor: 'transparent', overflow: 'hidden', marginTop: spacing.xs }}
+            >
+              <ThemeOption title="Light" icon="white-balance-sunny" value="light" index={0} />
+              <ThemeOption title="Dark" icon="moon-waning-crescent" value="dark" index={1} />
+              <ThemeOption title="System" icon="theme-light-dark" value="system" index={2} />
+            </AnimatedSurface>
+          )}
         </List.Section>
 
-        <Divider />
-
+        {/* Account Management */}
         <List.Section>
           <Animated.View entering={FadeInDown.duration(500).delay(300)}>
-            <List.Subheader style={{ color: theme.colors.onSurfaceVariant }}>Preferences</List.Subheader>
-          </Animated.View>
-          <AnimatedSurface 
-            entering={FadeInDown.duration(500).delay(400)}
-            style={{ backgroundColor: 'transparent', overflow: 'hidden' }}
-          >
-            <TouchableOpacity
-              onPress={toggleMenu}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 16,
-                borderRadius: theme.roundness,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.colors.onSurface, fontSize: 16 }}>Theme</Text>
-                <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 14, marginTop: 4 }}>
-                  {themeType.charAt(0).toUpperCase() + themeType.slice(1)}
-                </Text>
-              </View>
-              <Animated.View style={[{ transform: [{ rotate: `${rotation.value}deg` }] }]}>
-                <MaterialCommunityIcons 
-                  name="chevron-down"
-                  size={24} 
-                  color={theme.colors.onSurfaceVariant} 
-                />
-              </Animated.View>
-            </TouchableOpacity>
-
-            {menuVisible && (
-              <Animated.View
-                entering={FadeInDown.springify()}
-                exiting={FadeOut.duration(200)}
-                layout={Layout.springify()}
-              >
-                <ThemeOption title="Light" icon="white-balance-sunny" value="light" index={0} />
-                <ThemeOption title="Dark" icon="moon-waning-crescent" value="dark" index={1} />
-                <ThemeOption title="System" icon="theme-light-dark" value="system" index={2} />
-              </Animated.View>
-            )}
-          </AnimatedSurface>
-        </List.Section>
-
-        <List.Section>
-          <Animated.View entering={FadeInDown.duration(500).delay(500)}>
+            <List.Subheader style={{ color: theme.colors.onSurfaceVariant }}>Account</List.Subheader>
+            <List.Item
+              title="Edit Profile"
+              description="Update your profile information"
+              left={props => <List.Icon {...props} icon="account-edit" />}
+              onPress={() => router.push({ pathname: "/settings/profile" })}
+            />
+            <List.Item
+              title="Change Password"
+              description="Update your password"
+              left={props => <List.Icon {...props} icon="key" />}
+              onPress={() => router.push({ pathname: "/settings/password" })}
+            />
+            <List.Item
+              title="Help & Support"
+              description="Get help or contact support"
+              left={props => <List.Icon {...props} icon="help-circle" />}
+              onPress={() => router.push({ pathname: "/support" })}
+            />
             <List.Item
               title="Sign Out"
-              left={props => <List.Icon {...props} icon="logout" />}
+              description="Log out of your account"
+              left={props => <List.Icon {...props} icon="logout" color={theme.colors.error} />}
               onPress={signOut}
               titleStyle={{ color: theme.colors.error }}
             />

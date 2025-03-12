@@ -1,140 +1,281 @@
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Text, Card, Chip, Searchbar, IconButton, SegmentedButtons } from 'react-native-paper';
+import { Text, Searchbar, Surface, Avatar, Button, Chip, TouchableRipple, SegmentedButtons } from 'react-native-paper';
 import { sharedStyles } from '@/theme/styles';
 import { spacing } from '@/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
-// Mock data for different community categories
-const CATEGORIES = [
+// Mock data for communities
+const mockCommunities = [
   {
-    id: 'academics',
-    title: 'Academics',
-    icon: 'school',
-    communities: [
-      { id: 'cs', name: 'Computer Science', members: '1.2k', icon: 'laptop' },
-      { id: 'math', name: 'Mathematics', members: '800', icon: 'calculator' },
-      { id: 'physics', name: 'Physics', members: '600', icon: 'atom' },
-    ]
+    id: 'cs101',
+    name: 'Computer Science',
+    avatar: 'CS',
+    description: 'A community for computer science students and professionals to discuss various topics in the field.',
+    memberCount: 2500,
+    tags: ['Programming', 'AI', 'Web Dev', 'Mobile Dev'],
+    subCommunitiesCount: 2,
+    suggested: true
   },
   {
-    id: 'campus',
-    title: 'Campus Life',
-    icon: 'school-outline',
-    communities: [
-      { id: 'housing', name: 'Campus Housing', members: '3.8k', icon: 'home-group' },
-      { id: 'dining', name: 'Dining Hall', members: '2.5k', icon: 'food' },
-      { id: 'events', name: 'Campus Events', members: '5k', icon: 'calendar' },
-    ]
+    id: 'math101',
+    name: 'Mathematics',
+    avatar: 'MT',
+    description: 'A community dedicated to mathematical concepts, problem-solving, and theoretical discussions.',
+    memberCount: 1900,
+    tags: ['Calculus', 'Linear Algebra', 'Statistics', 'Number Theory'],
+    subCommunitiesCount: 2,
+    suggested: true
   },
   {
-    id: 'clubs',
-    title: 'Clubs & Organizations',
-    icon: 'account-group',
-    communities: [
-      { id: 'robotics', name: 'Robotics Club', members: '250', icon: 'robot' },
-      { id: 'finance', name: 'Finance Club', members: '3.2k', icon: 'cash' },
-      { id: 'sports', name: 'Sports Club', members: '1.5k', icon: 'basketball' },
-    ]
+    id: 'eng201',
+    name: 'Engineering',
+    avatar: 'ENG',
+    description: 'A hub for engineering students to collaborate and share knowledge across different disciplines.',
+    memberCount: 1800,
+    tags: ['Mechanical', 'Electrical', 'Civil', 'Chemical'],
+    subCommunitiesCount: 2,
+    suggested: false
   },
   {
-    id: 'support',
-    title: 'Support & Resources',
-    icon: 'lifebuoy',
-    communities: [
-      { id: 'health', name: 'Health & Wellness', members: '2.5k', icon: 'heart-pulse' },
-      { id: 'career', name: 'Career Center', members: '5k', icon: 'briefcase' },
-      { id: 'counseling', name: 'Counseling Services', members: '1.5k', icon: 'hand-heart' },
-    ]
+    id: 'bio101',
+    name: 'Biosciences',
+    avatar: 'BIO',
+    description: 'Community for biology and life sciences students to discuss research and developments.',
+    memberCount: 1500,
+    tags: ['Genetics', 'Biotechnology', 'Microbiology', 'Research'],
+    subCommunitiesCount: 2,
+    suggested: true
+  },
+  {
+    id: 'chem101',
+    name: 'Chemistry',
+    avatar: 'CH',
+    description: 'A community for chemistry enthusiasts to discuss chemical principles, research, and applications.',
+    memberCount: 1400,
+    tags: ['Organic Chemistry', 'Physical Chemistry', 'Biochemistry', 'Analytical'],
+    subCommunitiesCount: 2,
+    suggested: false
   }
 ];
+
+type FilterValue = 'joined' | 'suggested' | 'browse';
 
 export default function CommunitiesScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { filter: initialFilter } = useLocalSearchParams<{ filter?: FilterValue }>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewType, setViewType] = useState('browse');
+  const [joinedCommunities, setJoinedCommunities] = useState<string[]>([]);
+  const [filter, setFilter] = useState<FilterValue>(initialFilter || 'browse');
+
+  // Update filter when navigation params change
+  useEffect(() => {
+    if (initialFilter) {
+      setFilter(initialFilter);
+    }
+  }, [initialFilter]);
+
+  const handleJoin = (communityId: string, event: any) => {
+    event.stopPropagation(); // Prevent triggering the card's onPress
+    setJoinedCommunities(prev =>
+      prev.includes(communityId)
+        ? prev.filter(id => id !== communityId)
+        : [...prev, communityId]
+    );
+  };
+
+  const filteredCommunities = mockCommunities.filter(community => {
+    const matchesSearch = 
+      community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    switch (filter) {
+      case 'joined':
+        return matchesSearch && joinedCommunities.includes(community.id);
+      case 'suggested':
+        return matchesSearch && community.suggested && !joinedCommunities.includes(community.id);
+      case 'browse':
+      default:
+        return matchesSearch;
+    }
+  });
+
+  const renderCommunityCard = (community: typeof mockCommunities[0]) => (
+    <Surface
+      key={community.id}
+      style={{
+        marginBottom: spacing.md,
+        borderRadius: theme.roundness,
+        overflow: 'hidden',
+      }}
+    >
+      <TouchableRipple
+        onPress={() => router.push({
+          pathname: "/community/[id]",
+          params: { id: community.id }
+        })}
+      >
+        <View style={{ padding: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+            <Avatar.Text
+              size={48}
+              label={community.avatar}
+              style={{ marginRight: spacing.md }}
+            />
+            <View style={{ flex: 1 }}>
+              <TouchableRipple
+                onPress={() => router.push({
+                  pathname: "/community/[id]",
+                  params: { id: community.id }
+                })}
+              >
+                <Text 
+                  variant="titleLarge" 
+                  style={{ 
+                    color: theme.colors.primary,
+                    marginBottom: spacing.xs 
+                  }}
+                >
+                  {community.name}
+                </Text>
+              </TouchableRipple>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {community.memberCount.toLocaleString()} members
+                </Text>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {' • '}{community.subCommunitiesCount} sub-communities
+                </Text>
+                {community.suggested && filter === 'suggested' && (
+                  <Chip 
+                    mode="flat" 
+                    compact 
+                    style={{ 
+                      marginLeft: spacing.xs,
+                      backgroundColor: theme.colors.primaryContainer,
+                    }}
+                  >
+                    Suggested
+                  </Chip>
+                )}
+              </View>
+            </View>
+            <Button
+              mode={joinedCommunities.includes(community.id) ? "outlined" : "contained"}
+              onPress={(e) => handleJoin(community.id, e)}
+            >
+              {joinedCommunities.includes(community.id) ? 'Leave' : 'Join'}
+            </Button>
+          </View>
+
+          <Text
+            variant="bodyMedium"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              marginBottom: spacing.sm,
+            }}
+            numberOfLines={2}
+          >
+            {community.description}
+          </Text>
+
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+            {community.tags.map(tag => (
+              <Chip
+                key={tag}
+                compact
+                style={{ marginBottom: spacing.xs }}
+              >
+                {tag}
+              </Chip>
+            ))}
+          </View>
+        </View>
+      </TouchableRipple>
+    </Surface>
+  );
+
+  const renderEmptyState = () => (
+    <View style={{ 
+      flex: 1, 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      paddingVertical: spacing.xl,
+    }}>
+      <Text 
+        variant="titleMedium" 
+        style={{ 
+          color: theme.colors.onSurfaceVariant,
+          textAlign: 'center',
+          marginBottom: spacing.sm,
+        }}
+      >
+        {filter === 'joined' 
+          ? "You haven't joined any communities yet" 
+          : filter === 'suggested'
+          ? "No suggested communities found"
+          : "No communities found"}
+      </Text>
+      <Text 
+        variant="bodyMedium" 
+        style={{ 
+          color: theme.colors.onSurfaceVariant,
+          textAlign: 'center',
+          marginBottom: spacing.lg,
+        }}
+      >
+        {filter === 'joined' 
+          ? "Join some communities to see them here"
+          : filter === 'suggested'
+          ? "Try browsing all communities instead"
+          : "Try adjusting your search"}
+      </Text>
+      {filter !== 'browse' && (
+        <Button 
+          mode="contained"
+          onPress={() => setFilter('browse')}
+        >
+          Browse All Communities
+        </Button>
+      )}
+    </View>
+  );
 
   return (
-    <SafeAreaView style={[sharedStyles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[sharedStyles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <View style={{ padding: spacing.md }}>
         <Text variant="headlineMedium" style={{ marginBottom: spacing.md }}>Communities</Text>
-        
         <Searchbar
           placeholder="Search communities..."
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{ marginBottom: spacing.md }}
+          style={{
+            marginBottom: spacing.md,
+            backgroundColor: theme.colors.surfaceVariant,
+          }}
         />
-
         <SegmentedButtons
-          value={viewType}
-          onValueChange={setViewType}
+          value={filter}
+          onValueChange={value => setFilter(value as FilterValue)}
           buttons={[
-            { value: 'browse', label: 'Browse' },
-            { value: 'my', label: 'My Communities' },
+            { value: 'joined', label: 'Joined' },
             { value: 'suggested', label: 'Suggested' },
+            { value: 'browse', label: 'Browse' },
           ]}
           style={{ marginBottom: spacing.md }}
         />
       </View>
 
-      <ScrollView>
-        <View style={{ padding: spacing.md, paddingTop: 0 }}>
-          {CATEGORIES.map(category => (
-            <View key={category.id} style={{ marginBottom: spacing.lg }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-                <MaterialCommunityIcons 
-                  name={category.icon as any} 
-                  size={24} 
-                  color={theme.colors.primary}
-                  style={{ marginRight: spacing.sm }}
-                />
-                <Text variant="titleLarge" style={{ color: theme.colors.primary }}>{category.title}</Text>
-              </View>
-              
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: spacing.sm }}
-              >
-                {category.communities.map(community => (
-                  <Card 
-                    key={community.id}
-                    style={{ width: 200 }}
-                    onPress={() => router.push({
-                      pathname: "/community/[id]" as const,
-                      params: { id: community.id }
-                    })}
-                  >
-                    <Card.Content>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs }}>
-                        <MaterialCommunityIcons 
-                          name={community.icon as any} 
-                          size={24} 
-                          color={theme.colors.primary}
-                          style={{ marginRight: spacing.xs }}
-                        />
-                        <Text variant="titleMedium" numberOfLines={1}>{community.name}</Text>
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <MaterialCommunityIcons 
-                          name="account-group" 
-                          size={16} 
-                          color={theme.colors.outline}
-                          style={{ marginRight: spacing.xs }}
-                        />
-                        <Text variant="bodySmall" style={{ color: theme.colors.outline }}>{community.members} members</Text>
-                      </View>
-                    </Card.Content>
-                  </Card>
-                ))}
-              </ScrollView>
-            </View>
-          ))}
+      <ScrollView style={{ flex: 1 }}>
+        <View style={{ padding: spacing.md }}>
+          {filteredCommunities.length > 0 
+            ? filteredCommunities.map(renderCommunityCard)
+            : renderEmptyState()
+          }
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -22,6 +22,17 @@ export default function TabLayout() {
         headerTintColor: theme.colors.onSurface,
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 0,
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.surfaceVariant,
+          borderTopWidth: 1,
+          height: 60,
+        },
       }}
       tabBar={props => <CustomTabBar {...props} />}
     >
@@ -30,17 +41,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size+6} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="notice-board"
-        options={{
-          title: 'Notice Board',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bulletin-board" size={size+6} color={color} />
+            <MaterialCommunityIcons name="home" size={size} color={color} />
           ),
         }}
       />
@@ -50,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: 'Communities',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-group" size={size+12} color={color} />
+            <MaterialCommunityIcons name="account-group" size={size} color={color} />
           ),
         }}
       />
@@ -60,7 +61,17 @@ export default function TabLayout() {
         options={{
           title: 'Market',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cart" size={size+6} color={color} />
+            <MaterialCommunityIcons name="store" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="notice-board"
+        options={{
+          title: 'Notice Board',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="bulletin-board" size={size} color={color} />
           ),
         }}
       />
@@ -70,7 +81,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-tie" size={size+6} color={color} />
+            <MaterialCommunityIcons name="account" size={size} color={color} />
           ),
         }}
       />

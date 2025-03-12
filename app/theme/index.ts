@@ -1,17 +1,17 @@
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
-// Teal colors
-const teal = {
-  main: '#009B77',
-  light: '#4ECBB5',
-  dark: '#006B52'
+// Deep green colors
+const green = {
+  main: '#1B4332',  // Deep forest green
+  light: '#2D6A4F', // Medium forest green
+  dark: '#081C15'   // Very dark green
 };
 
-// Coral colors
-const coral = {
-  main: '#FF6B6B',
-  light: '#FF9B9B',
-  dark: '#CC4B4B'
+// Beige colors
+const beige = {
+  main: '#DDD5C8',   // Soft beige
+  light: '#F1EBE4',  // Light beige
+  dark: '#C8B9A9'    // Dark beige
 };
 
 export const spacing = {
@@ -27,21 +27,22 @@ export const lightTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: teal.main,
+    primary: green.main,
     onPrimary: '#FFFFFF',
-    primaryContainer: teal.light,
-    onPrimaryContainer: teal.dark,
-    secondary: coral.main,
+    primaryContainer: green.light,
+    onPrimaryContainer: beige.light,
+    secondary: green.light,
     onSecondary: '#FFFFFF',
-    secondaryContainer: coral.light,
-    onSecondaryContainer: coral.dark,
-    tertiary: coral.main,
-    onTertiary: '#FFFFFF',
-    tertiaryContainer: coral.light,
-    onTertiaryContainer: coral.dark,
-    background: '#FFFFFF',
-    surface: '#FFFFFF',
-    error: '#FF4B4B',
+    secondaryContainer: beige.main,
+    onSecondaryContainer: green.dark,
+    tertiary: green.dark,
+    onTertiary: beige.light,
+    tertiaryContainer: beige.light,
+    onTertiaryContainer: green.dark,
+    background: beige.light,
+    surface: beige.light,
+    surfaceVariant: beige.main,
+    error: '#B00020',
   },
   roundness: 12,
 };
@@ -50,21 +51,22 @@ export const darkTheme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: teal.light,
-    onPrimary: teal.dark,
-    primaryContainer: teal.dark,
-    onPrimaryContainer: teal.light,
-    secondary: coral.light,
-    onSecondary: coral.dark,
-    secondaryContainer: coral.dark,
-    onSecondaryContainer: coral.light,
-    tertiary: coral.light,
-    onTertiary: coral.dark,
-    tertiaryContainer: coral.dark,
-    onTertiaryContainer: coral.light,
-    background: '#121212',
-    surface: '#121212',
-    error: '#FF6B6B',
+    primary: green.light,
+    onPrimary: beige.light,
+    primaryContainer: green.main,
+    onPrimaryContainer: beige.light,
+    secondary: beige.main,
+    onSecondary: green.dark,
+    secondaryContainer: green.dark,
+    onSecondaryContainer: beige.light,
+    tertiary: beige.dark,
+    onTertiary: green.dark,
+    tertiaryContainer: green.dark,
+    onTertiaryContainer: beige.light,
+    background: green.dark,
+    surface: green.dark,
+    surfaceVariant: green.main,
+    error: '#CF6679',
   },
   roundness: 12,
 }; 

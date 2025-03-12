@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Text, Card, Chip, IconButton, FAB } from 'react-native-paper';
+import { Text, FAB } from 'react-native-paper';
 import { sharedStyles } from '@/theme/styles';
 import { spacing } from '@/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { CommunityCard } from '@/components/CommunityCard';
 import {
   mockDepartmentForums,
   mockOfficeHours,
@@ -19,6 +20,23 @@ import {
 export default function CommunityScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const [joinedCommunities, setJoinedCommunities] = useState<string[]>([]);
+
+  const handleJoinCommunity = (id: string) => {
+    setJoinedCommunities(prev => [...prev, id]);
+    // TODO: Implement actual join API call
+  };
+
+  const handleLeaveCommunity = (id: string) => {
+    setJoinedCommunities(prev => prev.filter(communityId => communityId !== id));
+    // TODO: Implement actual leave API call
+  };
+
+  // Add this helper function to get faculty name
+  const getFacultyName = (facultyId: string): string => {
+    const faculty = mockDepartments.flatMap(d => d.faculty).find(f => f.id === facultyId);
+    return faculty?.name || 'Faculty Member';
+  };
 
   return (
     <SafeAreaView style={[sharedStyles.container, { backgroundColor: theme.colors.background }]}>
@@ -30,19 +48,16 @@ export default function CommunityScreen() {
           <Text variant="titleLarge" style={{ marginBottom: spacing.sm }}>Department Forums</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
             {mockDepartments.map(dept => (
-              <Card
+              <CommunityCard
                 key={dept.id}
-                style={{ width: 200, marginRight: spacing.md }}
-                onPress={() => router.push({
-                  pathname: "/community/[id]" as const,
-                  params: { id: dept.id }
-                })}
-              >
-                <Card.Content>
-                  <Text variant="titleMedium">{dept.name}</Text>
-                  <Text variant="bodySmall" numberOfLines={2}>{dept.description}</Text>
-                </Card.Content>
-              </Card>
+                id={dept.id}
+                title={dept.name}
+                description={dept.description}
+                memberCount={dept.faculty.length + dept.students.length}
+                isJoined={joinedCommunities.includes(dept.id)}
+                onJoin={handleJoinCommunity}
+                onLeave={handleLeaveCommunity}
+              />
             ))}
           </ScrollView>
 
@@ -50,69 +65,50 @@ export default function CommunityScreen() {
           <Text variant="titleLarge" style={{ marginBottom: spacing.sm }}>Research Opportunities</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
             {mockResearchCollaborations.map(collab => (
-              <Card
+              <CommunityCard
                 key={collab.id}
-                style={{ width: 250, marginRight: spacing.md }}
-                onPress={() => router.push({
-                  pathname: "/community/[id]" as const,
-                  params: { id: collab.id }
-                })}
-              >
-                <Card.Content>
-                  <Text variant="titleMedium">{collab.title}</Text>
-                  <Text variant="bodySmall" numberOfLines={2}>{collab.description}</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.xs }}>
-                    {collab.tags.map(tag => (
-                      <Chip key={tag} style={{ marginRight: spacing.xs, marginTop: spacing.xs }}>{tag}</Chip>
-                    ))}
-                  </View>
-                </Card.Content>
-              </Card>
+                id={collab.id}
+                title={collab.title}
+                description={collab.description}
+                tags={collab.tags}
+                memberCount={collab.members.length}
+                isJoined={joinedCommunities.includes(collab.id)}
+                onJoin={handleJoinCommunity}
+                onLeave={handleLeaveCommunity}
+                width={300}
+              />
             ))}
           </ScrollView>
 
           {/* Mentorship */}
           <Text variant="titleLarge" style={{ marginBottom: spacing.sm }}>Mentorship Program</Text>
-          <Card
-            style={{ marginBottom: spacing.lg }}
-            onPress={() => router.push("/community/mentorship")}
-          >
-            <Card.Content>
-              <Text variant="titleMedium">{mockMentorshipProgram.name}</Text>
-              <Text variant="bodySmall">{mockMentorshipProgram.description}</Text>
-              <View style={{ flexDirection: 'row', marginTop: spacing.sm }}>
-                <Chip icon="account-supervisor" style={{ marginRight: spacing.xs }}>
-                  {mockMentorshipProgram.mentors.length} Mentors
-                </Chip>
-                <Chip icon="account-school" style={{ marginRight: spacing.xs }}>
-                  {mockMentorshipProgram.mentees.length} Mentees
-                </Chip>
-              </View>
-            </Card.Content>
-          </Card>
+          <CommunityCard
+            id="mentorship"
+            title={mockMentorshipProgram.name}
+            description={mockMentorshipProgram.description}
+            memberCount={mockMentorshipProgram.mentors.length + mockMentorshipProgram.mentees.length}
+            tags={['Mentorship', 'Career Development']}
+            isJoined={joinedCommunities.includes('mentorship')}
+            onJoin={handleJoinCommunity}
+            onLeave={handleLeaveCommunity}
+            showPreview={false}
+          />
 
           {/* Office Hours */}
           <Text variant="titleLarge" style={{ marginBottom: spacing.sm }}>Faculty Office Hours</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
             {mockOfficeHours.map(slot => (
-              <Card
+              <CommunityCard
                 key={slot.id}
-                style={{ width: 200, marginRight: spacing.md }}
-                onPress={() => router.push({
-                  pathname: "/community/[id]" as const,
-                  params: { id: slot.id }
-                })}
-              >
-                <Card.Content>
-                  <Text variant="titleMedium">
-                    {new Date(slot.date).toLocaleDateString()} • {slot.startTime}-{slot.endTime}
-                  </Text>
-                  <Text variant="bodySmall">{slot.location}</Text>
-                  <Chip icon="account-group" style={{ marginTop: spacing.xs }}>
-                    {slot.maxStudents - slot.bookedBy.length} spots left
-                  </Chip>
-                </Card.Content>
-              </Card>
+                id={slot.id}
+                title={`${getFacultyName(slot.facultyId)}'s Office Hours`}
+                description={`${new Date(slot.date).toLocaleDateString()} • ${slot.startTime}-${slot.endTime}\n${slot.location}`}
+                memberCount={slot.bookedBy.length}
+                tags={['Office Hours']}
+                isJoined={joinedCommunities.includes(slot.id)}
+                onJoin={handleJoinCommunity}
+                onLeave={handleLeaveCommunity}
+              />
             ))}
           </ScrollView>
 
@@ -120,26 +116,17 @@ export default function CommunityScreen() {
           <Text variant="titleLarge" style={{ marginBottom: spacing.sm }}>Alumni Network</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
             {mockAlumniNetwork.map(alumni => (
-              <Card
+              <CommunityCard
                 key={alumni.id}
-                style={{ width: 250, marginRight: spacing.md }}
-                onPress={() => router.push({
-                  pathname: "/community/[id]" as const,
-                  params: { id: alumni.id }
-                })}
-              >
-                <Card.Content>
-                  <Text variant="titleMedium">{alumni.name}</Text>
-                  <Text variant="bodySmall">
-                    {alumni.currentPosition.title} at {alumni.currentPosition.company}
-                  </Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.xs }}>
-                    {alumni.expertise.map(exp => (
-                      <Chip key={exp} style={{ marginRight: spacing.xs, marginTop: spacing.xs }}>{exp}</Chip>
-                    ))}
-                  </View>
-                </Card.Content>
-              </Card>
+                id={alumni.id}
+                title={alumni.name}
+                description={`${alumni.currentPosition.title} at ${alumni.currentPosition.company}`}
+                tags={alumni.expertise}
+                isJoined={joinedCommunities.includes(alumni.id)}
+                onJoin={handleJoinCommunity}
+                onLeave={handleLeaveCommunity}
+                width={300}
+              />
             ))}
           </ScrollView>
         </View>

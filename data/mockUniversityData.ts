@@ -149,7 +149,8 @@ export const mockDepartments: Department[] = [
         content: 'New AI course available for next semester',
         postedAt: new Date('2024-03-01')
       }
-    ]
+    ],
+    students: []
   }
 ];
 

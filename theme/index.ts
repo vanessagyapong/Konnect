@@ -69,34 +69,86 @@ export const shadows = {
   },
 };
 
-// Light theme shadow configuration
+// Primary Colors
+const primary = {
+  blue: {
+    main: '#4A90E2',
+    dark: '#2171CD',
+    pale: '#EBF4FC',  // Very light blue for cards
+    midnight: '#1A365D' // Deep blue for dark mode cards
+  },
+  teal: {
+    main: '#00897B',
+    light: '#4DB6AC',
+    pale: '#E0F2F1'  // Very light teal for alternate cards
+  },
+  indigo: {
+    main: '#3F51B5',
+    light: '#5C6BC0',
+    pale: '#E8EAF6'  // Very light indigo for hover states
+  },
+};
+
+// Neutral Colors
+const neutral = {
+  white: {
+    pure: '#FFFFFF',
+    off: '#E6F3FF'
+  },
+  gray: {
+    dark: '#2C3E50',
+    darker: '#34495E',
+    light: '#B8E2FF'
+  }
+};
+
+// Secondary Colors
+const secondary = {
+  orange: {
+    main: '#FFA500',
+    dark: '#FF8C00'
+  },
+  purple: {
+    main: '#6B46C1',    // Rich modern purple
+    light: '#9F7AEA',   // Soft lavender purple
+    pale: '#F3EEFF'     // Very light purple
+  },
+  green: {
+    main: '#228B22'
+  }
+};
+
+// Light theme configuration
 export const lightTheme: Theme = {
   ...MD3LightTheme,
   fonts,
   colors: {
     ...MD3LightTheme.colors,
     ...customColors,
-    primary: '#1E90FF',           // Sky Blue
-    primaryContainer: '#E6F3FF',  // Light Sky Blue
-    secondary: '#32CD32',         // Lime Green
-    secondaryContainer: '#E8F8E8', // Light Lime
-    tertiary: '#FF69B4',          // Hot Pink
-    tertiaryContainer: '#FFE6F3', // Light Pink
-    background: '#FFFFFF',        // Pure White
-    surface: '#FFFFFF',           // Pure White
-    surfaceVariant: '#F8F9FA',    // Off White
-    onSurface: '#2C3E50',         // Dark Blue Gray
-    onSurfaceVariant: '#34495E',  // Medium Blue Gray
-    outline: '#FFD700',           // Bright Yellow
-    error: '#FF4757',             // Bright Red
-    onPrimary: '#FFFFFF',         // White
-    onSecondary: '#FFFFFF',       // White
-    onPrimaryContainer: '#004C99', // Dark Blue
-    onSecondaryContainer: '#1B611B', // Dark Green
+    // Main theme colors
+    primary: primary.blue.main,
+    primaryContainer: primary.teal.light,
+    onPrimaryContainer: primary.indigo.main,
+    secondary: secondary.orange.main,
+    secondaryContainer: secondary.purple.light,
+    onSecondaryContainer: secondary.green.main,
+    tertiary: primary.indigo.main,
+    tertiaryContainer: primary.teal.light,
+    // Backgrounds and surfaces
+    background: neutral.white.pure,
+    surface: primary.blue.pale,        // Light blue tint for cards
+    surfaceVariant: primary.teal.pale, // Light teal tint for alternate cards
+    // Text and content colors
+    onSurface: neutral.gray.dark,
+    onSurfaceVariant: neutral.gray.darker,
+    outline: primary.blue.dark,
+    error: '#B00020',
+    onPrimary: neutral.white.pure,
+    onSecondary: neutral.white.pure,
   },
   dark: false,
   roundness: 16,
-  shadows: shadows,  // Add light mode shadows
+  shadows,
 };
 
 // Dark theme configuration
@@ -106,27 +158,30 @@ export const darkTheme: Theme = {
   colors: {
     ...MD3DarkTheme.colors,
     ...customColors,
-    primary: '#1E90FF',           // Sky Blue
-    primaryContainer: '#004C99',  // Dark Blue
-    secondary: '#32CD32',         // Lime Green
-    secondaryContainer: '#1B611B', // Dark Green
-    tertiary: '#FF69B4',          // Hot Pink
-    tertiaryContainer: '#99004D', // Dark Pink
-    background: '#1A1A2E',        // Deep Navy
-    surface: '#1E1E35',          // Navy Blue
-    surfaceVariant: '#232339',   // Medium Navy
-    onSurface: '#E6F3FF',        // Light Sky Blue
-    onSurfaceVariant: '#B8E2FF', // Pale Blue
-    outline: '#FFD700',          // Bright Yellow
-    error: '#FF4757',            // Bright Red
-    onPrimary: '#FFFFFF',        // White
-    onSecondary: '#FFFFFF',      // White
-    onPrimaryContainer: '#E6F3FF', // Light Sky Blue
-    onSecondaryContainer: '#E8F8E8', // Light Lime
+    // Main theme colors
+    primary: primary.blue.dark,
+    primaryContainer: primary.indigo.main,
+    onPrimaryContainer: neutral.white.pure,
+    secondary: secondary.orange.dark,
+    secondaryContainer: secondary.purple.main,
+    onSecondaryContainer: neutral.white.pure,
+    tertiary: primary.teal.main,
+    tertiaryContainer: primary.indigo.light,
+    // Backgrounds and surfaces
+    background: neutral.gray.dark,
+    surface: primary.blue.midnight,     // Deep blue for cards
+    surfaceVariant: primary.indigo.main, // Indigo for alternate cards
+    // Text and content colors
+    onSurface: neutral.white.off,
+    onSurfaceVariant: neutral.gray.light,
+    outline: primary.blue.main,
+    error: '#CF6679',
+    onPrimary: neutral.white.pure,
+    onSecondary: neutral.white.pure,
   },
   dark: true,
   roundness: 16,
-  shadows: shadows,  // Add dark mode shadows
+  shadows,
 };
 
 // Spacing system (in pixels)

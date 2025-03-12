@@ -1,37 +1,28 @@
 import { View, TouchableOpacity, Dimensions } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { spacing } from '@/theme';
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { theme } = useTheme();
-  const { isAdmin } = useAuth();
   const { width } = Dimensions.get('window');
 
-  // Filter out admin route if user is not admin
-  const visibleRoutes = state.routes.filter(route => {
-    if (route.name === 'admin') {
-      return isAdmin();
-    }
-    return true;
-  });
-
-  const tabWidth = width / visibleRoutes.length;
+  const tabWidth = width / 5; // Exactly 5 tabs
 
   return (
     <View style={{ 
       flexDirection: 'row',
       backgroundColor: theme.colors.surface,
-      height: 80,
+      height: 60,
       borderTopColor: theme.colors.surfaceVariant,
       borderTopWidth: 1,
-      paddingBottom: 20, // Account for safe area on newer iPhones
-      justifyContent: 'space-evenly',
+      paddingBottom: 0,
+      justifyContent: 'space-between',
       alignItems: 'center',
     }}>
-      {visibleRoutes.map((route, index) => {
+      {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const isFocused = state.index === visibleRoutes.indexOf(route);
+        const isFocused = state.index === index;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -65,16 +56,11 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 24,
-              backgroundColor: isFocused ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-              shadowColor: isFocused ? '#fff' : 'transparent',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: isFocused ? 0.5 : 0,
-              shadowRadius: 8,
-              elevation: isFocused ? 5 : 0,
+              backgroundColor: isFocused ? theme.colors.primaryContainer : 'transparent',
             }}>
               {options.tabBarIcon?.({
                 focused: isFocused,
-                color: isFocused ? '#fff' : theme.colors.onSurfaceVariant,
+                color: isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant,
                 size: 24,
               })}
             </View>

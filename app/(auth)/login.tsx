@@ -1,8 +1,8 @@
 import { View, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, Surface, IconButton, SegmentedButtons } from 'react-native-paper';
+import { TextInput, Button, Text, Surface, IconButton } from 'react-native-paper';
 import { Link, router } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth, UserType } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useState, useRef } from 'react';
 import { sharedStyles } from '../../theme/styles';
 import Animated, { 
@@ -33,12 +33,10 @@ const Login = () => {
   const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
 
-  const [userType, setUserType] = useState<UserType>('student');
   const [idNumber, setIdNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const passwordInputRef = useRef<RNTextInput>(null);
 
   const handleLogin = async () => {
@@ -54,21 +52,6 @@ const Login = () => {
 
       if (!idNumber || !password) {
         setError('ID number and password are required');
-        return;
-      }
-
-      // Validate ID number format
-      const studentPattern = /^STU\d{6}$/;  // STU followed by 6 digits
-      const staffPattern = /^STF\d{6}$/;    // STF followed by 6 digits
-      const adminPattern = /^ADM\d{6}$/;    // ADM followed by 6 digits
-
-      if (userType === 'student' && !studentPattern.test(idNumber)) {
-        setError('Invalid student ID format. Use STU followed by 6 digits');
-        return;
-      }
-
-      if (userType === 'staff' && !staffPattern.test(idNumber) && !adminPattern.test(idNumber)) {
-        setError('Invalid staff ID format. Use STF or ADM followed by 6 digits');
         return;
       }
 
@@ -132,34 +115,17 @@ const Login = () => {
                   paddingHorizontal: 17,
                 }}>
                   <Animated.View 
-                    entering={SlideInRight.duration(400)}
-                    style={{ marginBottom: 16 }}
-                  >
-                    <SegmentedButtons
-                      value={userType}
-                      onValueChange={value => setUserType(value as UserType)}
-                      buttons={[
-                        { value: 'student', label: 'Student' },
-                        { value: 'staff', label: 'Staff' },
-                      ]}
-                    />
-                  </Animated.View>
-
-                  <Animated.View 
                     entering={SlideInRight.duration(400).delay(200)}
                     style={sharedStyles.inputContainer}
                   >
                     <FormTextInput
-                      placeholder={`${userType === 'student' ? 'Student' : 'Staff'} ID`}
+                      placeholder="ID Number"
                       value={idNumber}
                       onChangeText={setIdNumber}
                       autoCapitalize="characters"
                       keyboardType="default"
                       nextInputRef={passwordInputRef}
-                      helperText={userType === 'student' ? 
-                        'Format: STU followed by 6 digits (e.g., STU123456)' : 
-                        'Format: STF or ADM followed by 6 digits (e.g., STF123456 or ADM123456)'
-                      }
+                      helperText="Enter your ID number"
                     />
                   </Animated.View>
 
@@ -172,7 +138,7 @@ const Login = () => {
                       placeholder="Password"
                       value={password}
                       onChangeText={setPassword}
-                      secureTextEntry={!showPassword}
+                      secureTextEntry
                       returnKeyType="go"
                       onSubmitEditing={handleLogin}
                       isPassword

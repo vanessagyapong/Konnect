@@ -11,8 +11,8 @@ interface User {
   idNumber: string;
   fullName: string;
   department?: string;
-  yearLevel?: number; // for students
-  position?: string;  // for staff
+  yearLevel?: number;
+  position?: string;
   status: 'active' | 'inactive';
 }
 
@@ -25,12 +25,9 @@ interface AuthContextType {
   signUp: (userData: {
     email: string;
     password: string;
-    userType: UserType;
     idNumber: string;
     fullName: string;
     department?: string;
-    yearLevel?: number;
-    position?: string;
   }) => Promise<void>;
   isAdmin: () => boolean;
   updateUserRole: (userId: string, role: string) => Promise<void>;
@@ -83,31 +80,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signIn(idNumber: string, password: string) {
     try {
       setIsLoading(true);
-      // Staff format: STF followed by 6 digits
-      // Student format: STU followed by 6 digits
-      const staffPattern = /^STF\d{6}$/;
-      const studentPattern = /^STU\d{6}$/;
-
-      let userType: UserType;
-
-      if (staffPattern.test(idNumber)) {
-        userType = 'staff';
-      } else if (studentPattern.test(idNumber)) {
-        userType = 'student';
-      } else {
-        throw new Error('Invalid ID number format');
-      }
-
+      
+      // TODO: Replace with actual API call to authenticate user
+      // The backend should return the user's role based on their ID
       const mockUser: User = {
         id: '1',
         email: 'user@example.com',
         username: idNumber,
-        userType,
+        userType: idNumber.startsWith('STF') ? 'staff' : 'student', // Role determined by backend
         idNumber,
         fullName: 'John Doe',
         department: 'Computer Science',
-        yearLevel: userType === 'student' ? 2 : undefined,
-        position: userType === 'staff' ? 'Professor' : undefined,
         status: 'active'
       };
 
@@ -146,26 +129,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signUp(userData: {
     email: string;
     password: string;
-    userType: UserType;
     idNumber: string;
     fullName: string;
     department?: string;
-    yearLevel?: number;
-    position?: string;
   }) {
     try {
       setIsLoading(true);
-      // TODO: Implement actual registration here
+      // TODO: Implement actual registration API call
+      // The backend should determine and return the user's role based on their ID
       const newUser: User = {
         id: Math.random().toString(),
         email: userData.email,
         username: userData.email.split('@')[0],
-        userType: userData.userType,
+        userType: userData.idNumber.startsWith('STF') ? 'staff' : 'student', // Role determined by backend
         idNumber: userData.idNumber,
         fullName: userData.fullName,
         department: userData.department,
-        yearLevel: userData.yearLevel,
-        position: userData.position,
         status: 'active'
       };
 

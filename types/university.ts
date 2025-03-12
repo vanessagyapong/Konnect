@@ -79,20 +79,24 @@ export interface Department {
   name: string;
   code: string;
   description: string;
-  faculty: {
+  faculty: Array<{
     id: string;
     name: string;
     title: string;
     email: string;
     officeHours: string[];
-  }[];
+  }>;
   courses: Course[];
-  announcements: {
+  announcements: Array<{
     id: string;
     title: string;
     content: string;
     postedAt: Date;
-  }[];
+  }>;
+  students: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface ResearchOpportunity {
